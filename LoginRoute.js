@@ -3,17 +3,21 @@ const bcrypt = require("bcryptjs");
 const LoginRoute = express.Router();
 const db = require("./db");
 
-LoginRoute.post("/", async (req, res) => {
-  const credentials = req.body;
-  const hash = bcrypt.hashSync(credentials.password, 14);
-  credentials.password = hash;
-
-  try {
-    const userLogin = await db("users").insert(credentials);
-    res.status(200).json(userLogin);
-  } catch (error) {
-    res.status(500).json({ message: "We failed" });
-  }
+LoginRoute.post("/", (req, res) => {
+  let { userName, password } = req.body;
+  db("users")
+    .where({ userName: userName })
+    .first()
+    .then(user => {
+      if (user && bcrypt.compareSync(password, user.password)) {
+        res.status(200).json({ message: `Welcome ${user.userName}` });
+      } else {
+        res.status(401).json({ message: "Thou shall not pass" });
+      }
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
 });
 
 module.exports = LoginRoute;
