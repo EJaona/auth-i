@@ -9,7 +9,7 @@ const sessionConfig = {
   name: "oatmeals",
   secret: "it's a secret, don't tell anyone",
   cookies: {
-    maxAge: 3000,
+    maxAge: 1000,
     security: false
   },
   httpOnly: true,
@@ -32,5 +32,14 @@ server.use(helmet());
 server.use("/api/register", RegisterRoute);
 server.use("/api/login", LoginRoute);
 server.use("/api/users", protected, UserRoute);
+
+server.get("/api/logout", async (req, res) => {
+  if (req.session) {
+    req.session.destroy();
+    res.json({ message: "bye bye" });
+  } else {
+    res.json({ message: "You already logged out" });
+  }
+});
 
 module.exports = server;
