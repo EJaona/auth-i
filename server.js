@@ -3,7 +3,9 @@ const express = require("express");
 const UserRoute = require("./UsersRoute");
 const RegisterRoute = require("./RegisterRoute");
 const LoginRoute = require("./LoginRoute");
+const db = require("./db");
 const session = require("express-session");
+const knexSessionStore = require("connect-session-knex")(session);
 
 const sessionConfig = {
   name: "oatmeals",
@@ -14,7 +16,14 @@ const sessionConfig = {
   },
   httpOnly: true,
   reSave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: new knexSessionStore({
+    tablename: "sessions",
+    sidfieldname: "sessionID",
+    knex: db,
+    createTable: true,
+    clearInterval: 600000
+  })
 };
 
 const protected = (req, res, next) => {
